@@ -1,1 +1,27 @@
-[]
+[
+    {
+        "name": "正職工時",
+        "rule_type": "MAX_HOURS_PER_WEEK",
+        "params": {
+            "hours": 70
+        },
+        "id": "1f60a30f-2d8f-4d64-ae14-22d543660efb"
+    },
+    {
+        "name": "正職天數",
+        "rule_type": "MAX_CONSECUTIVE_DAYS",
+        "params": {
+            "days": 5
+        },
+        "id": "499b5015-9bbb-48c0-8f46-c47a29b7066c"
+    },
+    {
+        "name": "正職班別",
+        "rule_type": "REQUIRED_LEVEL",
+        "params": {
+            "level": "吧檯手",
+            "shift": "早班"
+        },
+        "id": "f908bf02-52fc-4102-93dd-9bde743472d3"
+    }
+]
