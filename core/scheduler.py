@@ -4,6 +4,8 @@
 """
 from typing import List, Dict
 import random
+from calendar import monthrange
+import datetime
 from .models import Employee, Rule, Shift
 
 # 暫時定義一些班別用於測試
@@ -13,36 +15,54 @@ SHIFTS = [
     Shift(name="休息", start_time="", end_time="", color="#B8F2E6"),
 ]
 
-def generate_schedule(employees: List[Employee], rules: List[Rule], date_range: List[str]) -> Dict:
+class Scheduler:
     """
-    根據員工、規則和日期範圍來生成班表。
-    
-    階段二：實現一個基礎的隨機演算法作為原型。
-    它會為每個員工在每一天隨機指派一個班別。
+    核心排班演算法類別。
+    負責根據員工、規則和日期範圍來生成班表。
     """
-    print("\n--- 🧠 開始生成班表 (基礎隨機演算法) ---")
-    
-    schedule_result = {}  # 最終的排班結果, 結構: { '日期': { '員工ID': Shift } }
+    def __init__(self, employees: List[Employee], rules: List[Rule]):
+        self.employees = employees
+        self.rules = rules # 註：目前演算法尚未使用規則
+        self.employee_names = [emp.name for emp in self.employees]
+        print("\n--- 🧠 排班核心 (Scheduler) 已初始化 ---")
+        print(f"  - 參與排班員工: {self.employee_names}")
+        print(f"  - 套用規則數量: {len(self.rules)}")
+        print("---------------------------------")
 
-    for date in date_range:
-        schedule_result[date] = {}
-        for emp in employees:
-            # TODO: 在後續階段，這裡會被複雜的規則檢查所取代
-            # 目前只是隨機選擇一個班別
-            assigned_shift = random.choice(SHIFTS)
-            schedule_result[date][emp.id] = assigned_shift
-    
-    print("--- ✅ 班表生成完畢 ---")
-    
-    # 為了方便檢視，印出結果的預覽
-    print("\n--- 📊 班表預覽 ---")
-    for date, daily_shifts in list(schedule_result.items()):
-        print(f"📅 日期: {date}")
-        for emp_id, shift in daily_shifts.items():
-            # 在員工列表中找到對應的員工名字
-            emp_name = next((e.name for e in employees if e.id == emp_id), "未知員工")
-            print(f"  - {emp_name}: {shift.name}")
-    print("------------------\n")
+    def generate_schedule(self, year: int, month: int) -> Dict:
+        """
+        為指定的年份和月份生成班表。
 
-    return schedule_result
+        Args:
+            year (int): 目標年份
+            month (int): 目標月份
+
+        Returns:
+            dict: 生成的班表。格式為：
+                  { "headers": ["日期", "員工1", "員工2", ...],
+                    "data": [
+                        ["2025-09-01", "早班", "休息", ...],
+                        ...
+                    ]
+                  }
+        """
+        print(f"--- 正在為 {year}年 {month:02d}月 生成班表 ---")
+        
+        # 準備日期範圍
+        num_days = monthrange(year, month)[1]
+        date_range = [datetime.date(year, month, day) for day in range(1, num_days + 1)]
+        
+        headers = ["日期"] + self.employee_names
+        schedule_data = []
+
+        # 執行排班演算法 (目前為隨機)
+        for day in date_range:
+            daily_schedule = [day.strftime("%Y-%m-%d (%a)")]
+            for _ in self.employees:
+                assigned_shift = random.choice(SHIFTS)
+                daily_schedule.append(assigned_shift.name)
+            schedule_data.append(daily_schedule)
+
+        print(f"--- ✅ 班表生成完畢 ---")
+        return {"headers": headers, "data": schedule_data}
 

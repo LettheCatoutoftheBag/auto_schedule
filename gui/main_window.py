@@ -5,6 +5,8 @@
 from PyQt6.QtWidgets import QMainWindow, QTabWidget
 from .employee_view import EmployeeView
 from .rule_editor_view import RuleEditorView
+# --- 修改點：匯入新的 ScheduleView ---
+from .schedule_view import ScheduleView
 from core.employee_controller import EmployeeController
 from core.rule_controller import RuleController
 
@@ -15,27 +17,26 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("智慧排班小幫手")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1200, 700) # 加大視窗尺寸以容納新介面
 
         # --- 初始化核心控制器 ---
-        # 這些控制器是 GUI 和後端資料之間的橋樑
         self.employee_controller = EmployeeController()
         self.rule_controller = RuleController()
 
-        # --- 建立頁籤式主介面 (QTabWidget) ---
-        # 這是實現頁籤功能的關鍵元件
+        # --- 建立頁籤式主介面 ---
         self.tabs = QTabWidget()
-        self.setCentralWidget(self.tabs) # 將頁籤設為主視窗的中心
+        self.setCentralWidget(self.tabs)
 
-        # --- 建立並加入「員工管理」頁籤 ---
-        # 我們將 EmployeeView 實例作為一個頁籤加進去
-        employee_view = EmployeeView(self.employee_controller)
-        self.tabs.addTab(employee_view, "🧑‍🤝‍🧑 員工管理")
+        # --- 建立並加入各個頁籤 ---
+        employee_tab = EmployeeView(self.employee_controller)
+        self.tabs.addTab(employee_tab, "🧑‍🤝‍🧑 員工管理")
 
-        # --- 建立並加入「規則庫管理」頁籤 ---
-        # 我們將 RuleEditorView 實例作為另一個頁籤加進去
-        rule_editor_view = RuleEditorView(self.rule_controller)
-        self.tabs.addTab(rule_editor_view, "📚 規則庫管理")
+        rule_editor_tab = RuleEditorView(self.rule_controller)
+        self.tabs.addTab(rule_editor_tab, "📚 規則庫管理")
+        
+        # --- 修改點：建立並加入「班表生成」頁籤 ---
+        schedule_tab = ScheduleView(self.employee_controller, self.rule_controller)
+        self.tabs.addTab(schedule_tab, "📅 班表生成與編輯")
         
         print("🎨 主視窗 MainWindow 初始化完畢，已啟用頁籤介面。")
 
