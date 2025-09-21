@@ -1,0 +1,4 @@
+PyQt6
+openpyxl
+
+python-constraint # 待評估是否需要，暫時註解

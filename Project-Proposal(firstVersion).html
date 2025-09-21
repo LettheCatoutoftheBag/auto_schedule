@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>專案計畫書 - 智慧排班小幫手</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+        margin-top: 30px;
+      }
+      h1 {
+        text-align: center;
+        font-size: 2.5em;
+        border-bottom: 4px solid #2980b9;
+      }
+      h2 {
+        font-size: 2em;
+      }
+      h3 {
+        font-size: 1.5em;
+        border-bottom: 1px solid #bdc3c7;
+      }
+      code {
+        background-color: #ecf0f1;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-family: "Courier New", Courier, monospace;
+      }
+      pre {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 15px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-x: auto;
+      }
+      ul,
+      ol {
+        padding-left: 20px;
+      }
+      li {
+        margin-bottom: 10px;
+      }
+      strong {
+        color: #c0392b;
+      }
+      .meta-info {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #7f8c8d;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>專案名稱：智慧排班小幫手</h1>
+    <p class="meta-info">版本：修訂版</p>
+
+    <h2>1. 專案目標</h2>
+    <p>
+      本專案旨在開發一個<strong>簡潔、輕量、操作直觀</strong>的桌面應用程式。使用者將透過圖形化、模組化的「拼圖」介面來設定精細的排班條件。程式不僅能一鍵生成最佳化班表，更能讓使用者在生成的班表上進行直觀的拖曳微調。最終，應用程式將被打包成一個獨立的
+      <code>.exe</code> 執行檔，方便在任何 Windows 電腦上使用。
+    </p>
+
+    <h2>2. 核心功能詳述</h2>
+    <h3>2.1 員工管理系統 (Employee Management System)</h3>
+    <ul>
+      <li><strong>功能：</strong> 新增、編輯、刪除員工名單。</li>
+      <li>
+        <strong>級別定義：</strong>
+        可為每位員工設定「級別」（例如：吧檯手、門職人員、儲備幹部）。此級別將用於限制該員工可以被安排的班別類型。
+      </li>
+    </ul>
+
+    <h3>2.2 動態條件模組 (Dynamic "Puzzle" Rule Engine)</h3>
+    <ul>
+      <li>
+        <strong>規則庫：</strong>
+        提供一個獨立的介面，讓管理者可以新增、編輯、刪除常用的排班規則（例如「每月總工時上限」、「連續上班不得超過6天」），並將這些規則存入「規則庫」，方便重複使用。
+      </li>
+      <li>
+        <strong>拼圖式設定：</strong>
+        在主設定介面中，使用者可以為<strong>每一位員工</strong>獨立設定排班規則。透過從「規則庫」或「通用規則」中拖曳「規則拼圖」到對應的員工身上來完成設定。
+      </li>
+    </ul>
+
+    <h3>2.3 一鍵自動排班 (One-Click Auto-Scheduling)</h3>
+    <ul>
+      <li>
+        <strong>智慧演算法：</strong>
+        程式核心演算法將讀取所有為員工設定的規則，進行運算，目標是在滿足所有硬性條件下，達到人力分配的最佳平衡。
+      </li>
+      <li>
+        <strong>介面切換：</strong>
+        排班計算完成後，程式會自動跳轉至「互動式班表編輯器」介面，呈現排班結果。
+      </li>
+    </ul>
+
+    <h3>2.4 互動式班表編輯器 (Interactive Schedule Editor)</h3>
+    <ul>
+      <li>
+        <strong>視覺化班表：</strong>
+        以清晰的表格呈現排班結果，不同員工或班別以不同顏色標示。
+      </li>
+      <li>
+        <strong>拖曳換班：</strong>
+        使用者可以直接在班表上用滑鼠拖曳一個班別（拼圖），與另一位員工的班別進行交換，或移動到一個空班上。
+      </li>
+      <li>
+        <strong>即時規則驗證：</strong>
+        當使用者進行拖曳換班時，系統會即時驗證該操作是否違反了已設定的規則。若違反，會給予提示（例如拼圖變紅、跳出警告訊息），防止錯誤操作。
+      </li>
+      <li>
+        <strong>最終確認：</strong>
+        所有微調完成後，使用者可以鎖定並儲存最終班表。
+      </li>
+    </ul>
+
+    <h3>2.5 匯出與儲存 (Export & Save)</h3>
+    <ul>
+      <li>
+        <strong>專案存檔：</strong>
+        可以將完整的設定（包含員工名單、級別、規則庫、以及為每位員工配置的規則）儲存成一個專案檔。
+      </li>
+      <li>
+        <strong>班表匯出：</strong> 可將最終確認的班表匯出為
+        <code>Excel (.xlsx)</code> 檔案，方便列印與歸檔。
+      </li>
+    </ul>
+
+    <h2>3. 專案架構設計 (Project Architecture)</h2>
+    <p>為確保專案的模組化與可維護性，建議採用以下資料夾結構：</p>
+    <pre><code style="color:black;">/智慧排班小幫手
+├── main.py                  # 應用程式主進入點
+|
+├── /gui                     # 圖形介面 (GUI) 相關模組
+│   ├── main_window.py       # 主視窗框架
+│   ├── employee_view.py     # 員工管理介面
+│   ├── rule_editor_view.py  # 規則編輯器與規則庫介面
+│   └── schedule_view.py     # 互動式班表顯示與編輯介面
+|
+├── /core                    # 核心邏輯模組 (後端)
+│   ├── models.py            # 資料模型 (定義 Employee, Shift, Rule 等物件)
+│   └── scheduler.py         # 核心排班演算法
+|
+├── /data                    # 資料存儲
+│   └── rules_library.json   # 用於存儲規則庫的檔案
+|
+├── /assets                  # 靜態資源 (如圖示、字體)
+│   └── icon.png
+|
+└── requirements.txt         # 專案依賴的 Python 套件列表</code></pre>
+
+    <h2>4. 技術選型 (Technology Stack)</h2>
+    <ul>
+      <li><strong>程式語言:</strong> Python 3.10+</li>
+      <li><strong>圖形介面 (GUI) 框架:</strong> PyQt6</li>
+      <li>
+        <strong>排班核心演算法:</strong> 限制滿足問題 (Constraint Satisfaction
+        Problem, CSP) 導向的演算法
+      </li>
+      <li><strong>Excel 處理:</strong> <code>openpyxl</code> 函式庫</li>
+      <li><strong>打包工具:</strong> <code>PyInstaller</code></li>
+    </ul>
+
+    <h2>5. 開發與進度規劃 (Phased Timeline)</h2>
+    <ol>
+      <li>
+        <strong>階段一：基礎建設 (約 1 週)</strong>
+        <ul>
+          <li>任務：確定計畫後，初始化 Git 儲存庫。</li>
+          <li>任務：建立專案資料夾架構。</li>
+          <li>任務：在 <code>/core/models.py</code> 中定義好資料模型。</li>
+          <li>產出：一個結構完整、可運行的空白專案。</li>
+        </ul>
+      </li>
+      <li>
+        <strong>階段二：核心功能開發 (約 2 週)</strong>
+        <ul>
+          <li>任務：實現員工管理系統的後端邏輯。</li>
+          <li>任務：撰寫基礎版的排班演算法。</li>
+          <li>產出：可以透過純程式碼進行員工管理與基礎排班的核心邏輯。</li>
+        </ul>
+      </li>
+      <li>
+        <strong>階段三：靜態介面開發 (約 2 週)</strong>
+        <ul>
+          <li>任務：開發「員工管理」、「規則庫」、「班表顯示」的靜態介面。</li>
+          <li>產出：使用者可透過 GUI 操作員工資料與規則庫，並查看排班結果。</li>
+        </ul>
+      </li>
+      <li>
+        <strong>階段四：動態互動功能開發 (約 3 週)</strong>
+        <ul>
+          <li>任務：<strong>(重點)</strong> 實現「拼圖式」規則設定介面。</li>
+          <li>
+            任務：<strong>(重點)</strong>
+            實現「互動式班表編輯器」的拖曳換班與即時規則驗證。
+          </li>
+          <li>產出：專案最具特色的互動功能完成。</li>
+        </ul>
+      </li>
+      <li>
+        <strong>階段五：整合、測試與優化 (約 2 週)</strong>
+        <ul>
+          <li>任務：完整串接所有模組，進行完整測試與 Bug 修復。</li>
+          <li>產出：一個功能穩定、體驗流暢的應用程式。</li>
+        </ul>
+      </li>
+      <li>
+        <strong>階段六：打包與發布 (約 1 週)</strong>
+        <ul>
+          <li>任務：使用 PyInstaller 打包成 <code>.exe</code> 執行檔。</li>
+          <li>任務：編寫使用者操作手冊。</li>
+          <li>產出：專案最終成品與交付文件。</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h2>6. Git 版本控制設定</h2>
+    <ol>
+      <li>在專案根目錄執行 <code>git init</code> 建立本地儲存庫。</li>
+      <li>建立 <code>.gitignore</code> 檔案，忽略不必要的檔案。</li>
+      <li>
+        將初始化的專案架構提交 (<code>git add .</code> ->
+        <code>git commit -m "Initial project structure"</code>)。
+      </li>
+      <li>
+        （建議）將本地儲存庫與遠端的程式碼託管平台（如 GitHub, GitLab）連結。
+      </li>
+    </ol>
+  </body>
+</html>
