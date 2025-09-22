@@ -11,7 +11,6 @@ from typing import List, Any
 from core.models import Employee
 from core.employee_controller import EmployeeController
 
-
 # --- 資料模型：用於連接 GUI 表格和我們的員工資料 ---
 class EmployeeTableModel(QAbstractTableModel):
     def __init__(self, data: List[Employee]):
@@ -40,11 +39,9 @@ class EmployeeTableModel(QAbstractTableModel):
         return None
     
     def refreshData(self, new_data: List[Employee]):
-        """當外部資料變動時，刷新整個表格視圖"""
         self.beginResetModel()
         self._data = new_data
         self.endResetModel()
-
 
 # --- 對話方塊：用於新增或編輯員工 ---
 class EmployeeDialog(QDialog):
@@ -54,7 +51,8 @@ class EmployeeDialog(QDialog):
         
         self.name_input = QLineEdit(employee.name if employee else "")
         self.level_input = QComboBox()
-        self.level_input.addItems(["吧檯手", "門職人員", "儲備幹部", "其他"])
+        # --- 修改點：只保留三種身分 ---
+        self.level_input.addItems(["吧檯手", "門職", "時薪人員"])
         if employee:
             self.level_input.setCurrentText(employee.level)
 
@@ -66,10 +64,9 @@ class EmployeeDialog(QDialog):
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
 
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(self)
         main_layout.addLayout(form_layout)
         main_layout.addWidget(button_box)
-        self.setLayout(main_layout)
 
     def get_data(self):
         return {
@@ -77,47 +74,44 @@ class EmployeeDialog(QDialog):
             "level": self.level_input.currentText()
         }
 
-
 # --- 主視圖：整合表格、按鈕和所有邏輯 ---
 class EmployeeView(QWidget):
     def __init__(self, emp_controller: EmployeeController, parent=None):
         super().__init__(parent)
         self.controller = emp_controller
+        self.init_ui()
 
-        # --- 介面元件 ---
+    def init_ui(self):
         self.table_view = QTableView()
-        self.model = EmployeeTableModel(self.controller.get_all_employees())
+        self.model = EmployeeTableModel([]) # 初始為空
         self.table_view.setModel(self.model)
         self.table_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.table_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents) # ID欄位自動調整寬度
+        self.table_view.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
 
         self.add_button = QPushButton("➕ 新增員工")
         self.edit_button = QPushButton("✏️ 編輯員工")
         self.delete_button = QPushButton("🗑️ 刪除員工")
         
-        # --- 佈局 ---
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.edit_button)
         button_layout.addWidget(self.delete_button)
         button_layout.addStretch()
 
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(self)
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.table_view)
-        self.setLayout(main_layout)
-
-        # --- 連接信號與槽 (Signal & Slot) ---
+        
         self.add_button.clicked.connect(self.add_employee)
         self.edit_button.clicked.connect(self.edit_employee)
         self.delete_button.clicked.connect(self.delete_employee)
         
+        self.refresh_view() # 初始載入
         print("✅ 員工管理介面已載入。")
 
     def refresh_view(self):
-        """重新從控制器獲取最新資料並更新表格"""
         self.model.refreshData(self.controller.get_all_employees())
 
     def add_employee(self):

@@ -3,7 +3,7 @@
         "name": "正職工時",
         "rule_type": "MAX_HOURS_PER_WEEK",
         "params": {
-            "hours": 70
+            "hours": 160
         },
         "id": "1f60a30f-2d8f-4d64-ae14-22d543660efb"
     },
@@ -16,12 +16,23 @@
         "id": "499b5015-9bbb-48c0-8f46-c47a29b7066c"
     },
     {
-        "name": "正職班別",
+        "name": "9.5必須由吧檯手",
         "rule_type": "REQUIRED_LEVEL",
         "params": {
             "level": "吧檯手",
-            "shift": "早班"
+            "shift": "9.5-18"
         },
         "id": "f908bf02-52fc-4102-93dd-9bde743472d3"
+    },
+    {
+        "name": "指定休假",
+        "rule_type": "ASSIGN_FIXED_OFF_DAYS",
+        "params": {
+            "dates": [
+                "2025-10-03"
+            ],
+            "shift_name": "例休"
+        },
+        "id": "94eb947e-d02b-4f87-93ab-fc713a46b877"
     }
 ]
