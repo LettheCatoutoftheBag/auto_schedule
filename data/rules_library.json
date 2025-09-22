@@ -45,5 +45,13 @@
             "shift_name": "例休"
         },
         "id": "94eb947e-d02b-4f87-93ab-fc713a46b877"
+    },
+    {
+        "name": "兼職工時",
+        "rule_type": "MIN_MONTHLY_HOURS",
+        "params": {
+            "hours": 120
+        },
+        "id": "123bad40-1d4b-406c-9071-0f2c71656bf3"
     }
 ]
