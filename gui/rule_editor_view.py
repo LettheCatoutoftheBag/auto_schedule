@@ -6,30 +6,61 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QListWidget, QListWidgetItem, QMessageBox,
                              QDialog, QLineEdit, QComboBox, QFormLayout,
                              QDialogButtonBox, QLabel, QStackedLayout,
-                             QSpinBox, QGroupBox, QCalendarWidget, QListWidget,
+                             QSpinBox, QGroupBox, QCalendarWidget, 
                              QAbstractItemView)
 from PyQt6.QtCore import Qt, QDate
 from core.models import Rule
 from core.rule_controller import RuleController
 from core.rule_engine import RULE_DEFINITIONS, get_rule_display_text
-# 引用核心中的班別定義，確保一致性
 from core.scheduler import SHIFTS
 
-# --- 對話方塊：用於新增或編輯規則 (超級升級版) ---
+
+class MultiDateSelectionWidget(QWidget):
+    """一個用於多選日期的自訂元件"""
+    def __init__(self, initial_dates=None, parent=None):
+        super().__init__(parent)
+        self.selected_dates = set(QDate.fromString(d, "yyyy-MM-dd") for d in (initial_dates or []))
+
+        layout = QHBoxLayout(self)
+        self.calendar = QCalendarWidget()
+        self.calendar.setGridVisible(True)
+        self.calendar.clicked.connect(self.toggle_date)
+
+        self.list_widget = QListWidget()
+        
+        layout.addWidget(self.calendar, 2)
+        layout.addWidget(self.list_widget, 1)
+
+        self.refresh_list()
+
+    def toggle_date(self, date):
+        if date in self.selected_dates:
+            self.selected_dates.remove(date)
+        else:
+            self.selected_dates.add(date)
+        self.refresh_list()
+
+    def refresh_list(self):
+        self.list_widget.clear()
+        sorted_dates = sorted(list(self.selected_dates))
+        for date in sorted_dates:
+            self.list_widget.addItem(date.toString("yyyy-MM-dd"))
+
+    def get_selected_dates(self):
+        return [d.toString("yyyy-MM-dd") for d in sorted(list(self.selected_dates))]
+
 class RuleDialog(QDialog):
     def __init__(self, rule: Rule = None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("新增規則" if rule is None else "編輯規則")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(600)
         
         self.param_widgets = {}
 
-        # --- 主要元件 ---
         self.name_input = QLineEdit(rule.name if rule else "")
         self.type_input = QComboBox()
         self.type_input.addItems(RULE_DEFINITIONS.keys())
 
-        # --- 動態參數區 ---
         self.param_stack = QStackedLayout()
         self.setup_param_layouts()
         
@@ -38,12 +69,11 @@ class RuleDialog(QDialog):
 
         self.type_input.currentTextChanged.connect(self.on_type_changed)
 
-        # --- 按鈕與整體佈局 ---
         button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(self)
         form_layout = QFormLayout()
         form_layout.addRow("規則名稱 (例如: YI的固定班)", self.name_input)
         form_layout.addRow("選擇規則類型", self.type_input)
@@ -56,18 +86,17 @@ class RuleDialog(QDialog):
             self.initialize_for_editing(rule)
 
     def setup_param_layouts(self):
-        """根據 RULE_DEFINITIONS 建立所有可能的參數輸入介面"""
         work_shifts = [s.name for s in SHIFTS if s.name not in ["休", "例休"]]
+        late_shifts = ["10.5-19", "10.5-20.5", "13-21.5", "14-22"]
 
         for display_name, definition in RULE_DEFINITIONS.items():
             param_form = QFormLayout()
             container_widget = QWidget()
             container_widget.setLayout(param_form)
-            
             self.param_widgets[display_name] = {}
 
-            if not definition["params"]: # 如果規則不需要參數
-                param_form.addRow(QLabel("此規則為全域設定，無需額外參數。"))
+            if not definition["params"]:
+                param_form.addRow(QLabel("此規則為系統內建邏輯，無需額外參數。"))
 
             for param_key, (label, param_type) in definition["params"].items():
                 widget = None
@@ -78,12 +107,14 @@ class RuleDialog(QDialog):
                     widget = QCalendarWidget()
                     widget.setGridVisible(True)
                 elif param_type == "dates":
-                    widget = QCalendarWidget()
-                    widget.setGridVisible(True)
-                    # 允許多選模式，但實際邏輯需在 get_data 中處理
+                    widget = MultiDateSelectionWidget()
                 elif param_type == "shift_options":
                     widget = QComboBox()
                     widget.addItems(work_shifts)
+                elif param_type == "multi_shift_options":
+                    widget = QListWidget()
+                    widget.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+                    widget.addItems(late_shifts)
                 elif isinstance(param_type, list):
                     widget = QComboBox()
                     widget.addItems(param_type)
@@ -110,8 +141,14 @@ class RuleDialog(QDialog):
 
                 if isinstance(widget, QComboBox): widget.setCurrentText(str(value))
                 elif isinstance(widget, QSpinBox): widget.setValue(int(value))
-                elif isinstance(widget, QCalendarWidget) and RULE_DEFINITIONS[display_name_to_set]['params'][param_key][1] == 'date':
-                    widget.setSelectedDate(QDate.fromString(value, "yyyy-MM-dd"))
+                elif isinstance(widget, QCalendarWidget): widget.setSelectedDate(QDate.fromString(value, "yyyy-MM-dd"))
+                elif isinstance(widget, MultiDateSelectionWidget):
+                    widget.selected_dates = set(QDate.fromString(d, "yyyy-MM-dd") for d in value)
+                    widget.refresh_list()
+                elif isinstance(widget, QListWidget):
+                    for i in range(widget.count()):
+                        if widget.item(i).text() in value:
+                            widget.item(i).setSelected(True)
 
     def get_data(self):
         name = self.name_input.text().strip()
@@ -123,22 +160,19 @@ class RuleDialog(QDialog):
         params = {}
         current_param_widgets = self.param_widgets.get(selected_display_name, {})
         for param_key, widget in current_param_widgets.items():
-            param_def = definition["params"][param_key]
             if isinstance(widget, QComboBox):
                 params[param_key] = widget.currentText()
             elif isinstance(widget, QSpinBox):
                 params[param_key] = widget.value()
             elif isinstance(widget, QCalendarWidget):
-                if param_def[1] == 'date':
-                    params[param_key] = widget.selectedDate().toString("yyyy-MM-dd")
-                elif param_def[1] == 'dates':
-                     # 注意：PyQt的QCalendarWidget不直接支援多選，此處僅為範例
-                     # 實際多選功能需要更複雜的自訂元件
-                    params[param_key] = [widget.selectedDate().toString("yyyy-MM-dd")]
+                params[param_key] = widget.selectedDate().toString("yyyy-MM-dd")
+            elif isinstance(widget, MultiDateSelectionWidget):
+                params[param_key] = widget.get_selected_dates()
+            elif isinstance(widget, QListWidget):
+                params[param_key] = [item.text() for item in widget.selectedItems()]
 
         return {"name": name, "rule_type": definition["type"], "params": params}
 
-# --- 主視圖 ---
 class RuleEditorView(QWidget):
     def __init__(self, rule_controller: RuleController, parent=None):
         super().__init__(parent)
@@ -159,7 +193,6 @@ class RuleEditorView(QWidget):
         button_layout.addStretch()
 
         main_layout = QVBoxLayout(self)
-        main_layout.addWidget(QLabel("這裡是您的規則庫，定義好的規則將可以像拼圖一樣套用給員工。"))
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.rule_list)
 
@@ -167,7 +200,6 @@ class RuleEditorView(QWidget):
         self.edit_button.clicked.connect(self.edit_rule)
         self.delete_button.clicked.connect(self.delete_rule)
         self.rule_list.itemDoubleClicked.connect(self.edit_rule)
-        print("✅ 規則編輯器介面已升級並載入。")
 
     def refresh_view(self):
         self.rule_list.clear()
@@ -183,7 +215,6 @@ class RuleEditorView(QWidget):
             data = dialog.get_data()
             if data:
                 self.controller.add_rule(data["name"], data["rule_type"], data["params"])
-                self.refresh_view()
             else:
                 QMessageBox.warning(self, "輸入錯誤", "規則名稱不能為空。")
 
@@ -201,7 +232,6 @@ class RuleEditorView(QWidget):
             data = dialog.get_data()
             if data:
                 self.controller.update_rule(rule_id, data["name"], data["rule_type"], data["params"])
-                self.refresh_view()
             else:
                 QMessageBox.warning(self, "輸入錯誤", "規則名稱不能為空。")
                 
@@ -221,5 +251,4 @@ class RuleEditorView(QWidget):
 
         if reply == QMessageBox.StandardButton.Yes:
             self.controller.delete_rule(rule_id)
-            self.refresh_view()
 

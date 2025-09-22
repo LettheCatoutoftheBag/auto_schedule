@@ -7,11 +7,10 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                              QDialog, QLineEdit, QComboBox, QFormLayout,
                              QDialogButtonBox, QHeaderView)
 from PyQt6.QtCore import Qt, QAbstractTableModel
-from typing import List, Any
+from typing import List
 from core.models import Employee
 from core.employee_controller import EmployeeController
 
-# --- 資料模型：用於連接 GUI 表格和我們的員工資料 ---
 class EmployeeTableModel(QAbstractTableModel):
     def __init__(self, data: List[Employee]):
         super().__init__()
@@ -43,7 +42,6 @@ class EmployeeTableModel(QAbstractTableModel):
         self._data = new_data
         self.endResetModel()
 
-# --- 對話方塊：用於新增或編輯員工 ---
 class EmployeeDialog(QDialog):
     def __init__(self, employee: Employee = None, parent=None):
         super().__init__(parent)
@@ -74,7 +72,6 @@ class EmployeeDialog(QDialog):
             "level": self.level_input.currentText()
         }
 
-# --- 主視圖：整合表格、按鈕和所有邏輯 ---
 class EmployeeView(QWidget):
     def __init__(self, emp_controller: EmployeeController, parent=None):
         super().__init__(parent)
@@ -83,7 +80,7 @@ class EmployeeView(QWidget):
 
     def init_ui(self):
         self.table_view = QTableView()
-        self.model = EmployeeTableModel([]) # 初始為空
+        self.model = EmployeeTableModel([])
         self.table_view.setModel(self.model)
         self.table_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -108,8 +105,7 @@ class EmployeeView(QWidget):
         self.edit_button.clicked.connect(self.edit_employee)
         self.delete_button.clicked.connect(self.delete_employee)
         
-        self.refresh_view() # 初始載入
-        print("✅ 員工管理介面已載入。")
+        self.refresh_view()
 
     def refresh_view(self):
         self.model.refreshData(self.controller.get_all_employees())

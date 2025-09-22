@@ -19,9 +19,13 @@ class RuleListWidget(QTreeWidget):
         self.rule_controller = rule_controller
         self.setDragEnabled(True)
         self.setHeaderHidden(True)
-        self.populate_rules()
+        self.populate_rules() # 第一次手動載入
 
     def populate_rules(self):
+        """
+        這現在是一個「槽 (Slot)」，可以被信號觸發來自動更新。
+        """
+        print("🔄️ 偵測到規則庫變動，正在同步『班表頁籤』的規則列表...")
         self.clear()
         for rule in self.rule_controller.get_all_rules():
             display_text = get_rule_display_text(rule)
@@ -53,7 +57,6 @@ class AssignmentTreeWidget(QTreeWidget):
 
     def populate_employees(self):
         self.clear()
-        # 修正點：建立節點時，同時將 ID 存入 UserRole
         global_item = QTreeWidgetItem(self, ["🌐 全域規則"])
         global_item.setData(0, Qt.ItemDataRole.UserRole, "GLOBAL_RULES")
         global_item.setExpanded(True)
@@ -68,7 +71,6 @@ class AssignmentTreeWidget(QTreeWidget):
         if event.mimeData().hasText():
             event.acceptProposedAction()
     
-    # 修正點：新增 dragMoveEvent 確保拖曳過程順暢
     def dragMoveEvent(self, event):
         event.accept()
 
@@ -84,7 +86,6 @@ class AssignmentTreeWidget(QTreeWidget):
         
         display_text = get_rule_display_text(rule)
         new_rule_item = QTreeWidgetItem(parent_item, [display_text])
-        # 修正點：將 rule_id 存入新節點的 UserRole
         new_rule_item.setData(0, Qt.ItemDataRole.UserRole, rule_id)
         event.acceptProposedAction()
 
@@ -94,7 +95,6 @@ class AssignmentTreeWidget(QTreeWidget):
             if not selected_items: return
             
             for item in selected_items:
-                # 這個判斷式確保了只有子節點(規則)可以被刪除
                 if item.parent():
                     item.parent().removeChild(item)
         else:
@@ -157,17 +157,15 @@ class ScheduleView(QWidget):
         assignments = {"global": [], "employees": {}}
         root = self.assignment_tree.invisibleRootItem()
         
-        # 修正點：從 UserRole 讀取 global 的規則 ID
         global_item = root.child(0)
         for i in range(global_item.childCount()):
             rule_item = global_item.child(i)
             assignments["global"].append(rule_item.data(0, Qt.ItemDataRole.UserRole))
             
-        # 修正點：從 UserRole 讀取員工 ID 和其對應的規則 ID
         for i in range(1, root.childCount()):
             emp_item = root.child(i)
             emp_id = emp_item.data(0, Qt.ItemDataRole.UserRole)
-            if emp_id is None: continue # 保護機制
+            if emp_id is None: continue
             
             assignments["employees"][emp_id] = []
             for j in range(emp_item.childCount()):
